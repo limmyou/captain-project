@@ -3,4 +3,12 @@ uvicorn
 jinja2
 python-multipart
 aiofiles
+geopandas
+shapely
+pyproj
+fiona
+rasterio
+pandas
+numpy
+matplotlib
 streamlit
