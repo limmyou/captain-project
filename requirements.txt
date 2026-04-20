@@ -3,14 +3,8 @@ uvicorn
 jinja2
 python-multipart
 aiofiles
-geopandas
-shapely
-pyproj
-fiona
-rasterio
+streamlit
 pandas
 numpy
 matplotlib
-dotenv
-skimage
-streamlit
+python-dotenv
