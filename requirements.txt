@@ -11,4 +11,5 @@ rasterio
 pandas
 numpy
 matplotlib
+dotenv
 streamlit
