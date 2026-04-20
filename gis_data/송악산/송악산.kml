@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>송악산.kml</name>
+	<StyleMap id="m_ylw-pushpin">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="s_ylw-pushpin">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<Style id="s_ylw-pushpin_hl">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<Placemark>
+		<name>송악산 정상부</name>
+		<styleUrl>#m_ylw-pushpin</styleUrl>
+		<Polygon>
+			<tessellate>1</tessellate>
+			<outerBoundaryIs>
+				<LinearRing>
+					<coordinates>
+						126.2889601042624,33.19879094086424,0 126.2890195890209,33.19878669190324,0 126.2890732335352,33.19879244578314,0 126.28904726772,33.19875744314501,0 126.2890717546509,33.19870056171445,0 126.2891061309033,33.19869695763227,0 126.2891691177736,33.19869982383047,0 126.2892261007907,33.19874064857981,0 126.2892781254004,33.19876083465294,0 126.2892846464941,33.1987632053057,0 126.2893434582076,33.19879898939965,0 126.2893557550485,33.19883716757322,0 126.2893356239628,33.19888494738311,0 126.2893601694111,33.19891882479135,0 126.2893829642211,33.19897334767644,0 126.2893836775809,33.1989758130655,0 126.2893842752287,33.19902378009149,0 126.2893844177128,33.19904818593746,0 126.2893730518955,33.19905902490778,0 126.2892847086554,33.19906630811396,0 126.289241137958,33.19908799060618,0 126.2892129126698,33.19907874054635,0 126.2891601755807,33.19904158938807,0 126.2891255744969,33.19896918168921,0 126.2890563441887,33.19896754723611,0 126.2890201981899,33.1988885154188,0 126.2889673772611,33.1988324040715,0 126.2889601042624,33.19879094086424,0 
+					</coordinates>
+				</LinearRing>
+			</outerBoundaryIs>
+		</Polygon>
+		<atom:link rel="app" href="https://www.google.com/earth/about/versions/#earth-pro" title="Google Earth Pro 7.3.7.1094"></atom:link>
+	</Placemark>
+</Document>
+</kml>

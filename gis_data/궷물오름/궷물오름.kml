@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>궷물오름.kml</name>
+	<StyleMap id="m_ylw-pushpin">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="s_ylw-pushpin">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<Style id="s_ylw-pushpin_hl">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<Placemark>
+		<name>궷물오름</name>
+		<styleUrl>#m_ylw-pushpin</styleUrl>
+		<Polygon>
+			<tessellate>1</tessellate>
+			<outerBoundaryIs>
+				<LinearRing>
+					<coordinates>
+						126.4042865529093,33.39868267383564,0 126.4039974807227,33.39786908281486,0 126.4042034186797,33.39733862373615,0 126.404217536346,33.3973146223436,0 126.4044730885657,33.39687104344932,0 126.4050637712934,33.39634687175577,0 126.4057121995499,33.39609293392459,0 126.406370312765,33.39600521358411,0 126.4071969892775,33.39611098521654,0 126.407873419926,33.39643155353827,0 126.4083493451477,33.39656651853768,0 126.4087073345667,33.39687020329196,0 126.4089761440214,33.39736727899967,0 126.4093157864939,33.39815040684525,0 126.4093937194424,33.39873814378227,0 126.4093935288892,33.39875999239591,0 126.4092122516183,33.39917132497982,0 126.4088637521657,33.3994401681452,0 126.4088575018401,33.39947729149368,0 126.4083411544753,33.3996547972151,0 126.4076327231277,33.39988176304401,0 126.4067499154027,33.39992365089027,0 126.4061948893641,33.40002966192835,0 126.4055157787898,33.4000322331317,0 126.4047838089897,33.39935542228127,0 126.4042865529093,33.39868267383564,0 
+					</coordinates>
+				</LinearRing>
+			</outerBoundaryIs>
+		</Polygon>
+		<atom:link rel="app" href="https://www.google.com/earth/about/versions/#earth-pro" title="Google Earth Pro 7.3.6.10441"></atom:link>
+	</Placemark>
+</Document>
+</kml>
