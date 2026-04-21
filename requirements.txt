@@ -8,7 +8,7 @@ pandas
 numpy
 matplotlib
 python-dotenv
-
+dendropy
 geopandas
 shapely
 pyproj
