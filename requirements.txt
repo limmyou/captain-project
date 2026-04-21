@@ -8,3 +8,12 @@ pandas
 numpy
 matplotlib
 python-dotenv
+
+geopandas
+shapely
+pyproj
+fiona
+rasterio
+
+scikit-image
+email-validator
