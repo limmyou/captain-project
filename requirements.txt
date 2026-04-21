@@ -17,5 +17,6 @@ rasterio
 baltic
 gym
 seaborn
+numba
 scikit-image
 email-validator
