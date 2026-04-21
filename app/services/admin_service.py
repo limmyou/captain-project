@@ -1,5 +1,4 @@
 # app/services/admin_service.py
-import geopandas as gpd
 from shapely.geometry import Point
 from functools import lru_cache
 from app.core.config import EMD_SHAPEFILE_PATH
@@ -7,6 +6,7 @@ from app.core.config import EMD_SHAPEFILE_PATH
 
 @lru_cache(maxsize=1)
 def load_emd_boundary() -> gpd.GeoDataFrame:
+    import geopandas as gpd
     if not EMD_SHAPEFILE_PATH:
         raise ValueError("EMD_SHAPEFILE_PATH가 설정되지 않았습니다.")
 
@@ -19,6 +19,7 @@ def load_emd_boundary() -> gpd.GeoDataFrame:
 
 
 def get_admin_info(lat: float, lon: float) -> dict:
+    import geopandas as gpd
     emd = load_emd_boundary()
 
     point = gpd.GeoSeries([Point(lon, lat)], crs="EPSG:4326")
