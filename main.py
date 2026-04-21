@@ -1,7 +1,6 @@
 from pathlib import Path
 import os
 import glob
-import geopandas as gpd
 import traceback
 
 from fastapi import FastAPI, HTTPException
@@ -96,7 +95,7 @@ def simulate(req: SimulationRequest):
         os.makedirs(str(run_tif_dir), exist_ok=True)
 
         site_shp_path = run_shp_dir / f"{site_name}.shp"
-
+        import geopandas as gpd
         site_gdf = gpd.GeoDataFrame(
             [{"name": site_name, "emd_cd": admin_info["emd_cd"]}],
             geometry=[admin_info["geometry"]],
