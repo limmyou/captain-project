@@ -4,7 +4,7 @@ from app.core.config import EMD_SHAPEFILE_PATH
 
 
 @lru_cache(maxsize=1)
-def load_emd_boundary() -> gpd.GeoDataFrame:
+def load_emd_boundary():
     import geopandas as gpd
     if not EMD_SHAPEFILE_PATH:
         raise ValueError("EMD_SHAPEFILE_PATH가 설정되지 않았습니다.")
