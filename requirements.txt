@@ -16,5 +16,6 @@ fiona
 rasterio
 baltic
 gym
+seaborn
 scikit-image
 email-validator
