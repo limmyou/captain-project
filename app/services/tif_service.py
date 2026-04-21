@@ -1,5 +1,4 @@
 import os
-import geopandas as gpd
 import rasterio
 from rasterio import features
 from rasterio.transform import from_bounds
@@ -15,7 +14,7 @@ def create_soil_tifs(
     nodata_value: float = -9999.0
 ):
     os.makedirs(output_dir, exist_ok=True)
-
+    import geopandas as gpd
     gdf = gpd.read_file(shp_path)
 
     if gdf.empty:
