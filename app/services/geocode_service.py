@@ -19,12 +19,21 @@ def geocode(address: str) -> tuple[float, float]:
             "type": addr_type,
             "key": VWORLD_API_KEY
         }
+        print("VWORLD_KEY exists:", bool(VWORLD_API_KEY))
+        print("address:", address)
+
 
         try:
+            print("👉 sending request to VWorld...")
             res = requests.get(VWORLD_URL, params=params, timeout=10)
+
+            print("👉 status code:", res.status_code)
+            print("👉 response text:", res.text[:300])
+
             res.raise_for_status()
             data = res.json()
         except requests.RequestException as e:
+            print("❌ VWorld request failed:", repr(e))
             raise RuntimeError(f"VWorld API 요청 실패: {e}")
 
         response = data.get("response", {})
