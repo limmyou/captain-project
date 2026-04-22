@@ -92,6 +92,9 @@ def simulate(req: SimulationRequest):
         # 2. 좌표 -> 행정구역
         admin_info = get_admin_info(lat, lon)
         print("🔥 admin_info ok:", admin_info.get("emd_cd"), flush=True)
+
+
+
         # 3. 해당 행정구역 geometry 하나만 shp로 저장
         site_name = req.address.replace(" ", "_")
         run_base_dir = BASE_DIR / "run_data" / site_name
@@ -121,13 +124,14 @@ def simulate(req: SimulationRequest):
             "pH": soil_data.get("pH") if soil_data.get("pH") is not None else 5.47,
             "EC": soil_data.get("EC") if soil_data.get("EC") is not None else 0.55,
         }
-
+        print("🚀 BEFORE create_soil_tifs", flush=True)
         # 5. 토양 tif 생성
         tif_result = create_soil_tifs(
             shp_path=str(site_shp_path),
             output_dir=str(run_tif_dir),
             data_values=safe_soil_data
         )
+        print("🚀 AFTER create_soil_tifs", flush=True)
 
         # 6. 기간 설정
         n_years = 3 if req.period == "short" else 20
@@ -136,7 +140,9 @@ def simulate(req: SimulationRequest):
         print("req.grid_size =", req.grid_size)
         print("req.address =", req.address)
 
+
         # 7. 시뮬레이션 실행
+        print("🚀 BEFORE run_simulation", flush=True)
         sim_result = run_simulation(
             site=site_name,
             shp_path=str(site_shp_path),
@@ -146,7 +152,8 @@ def simulate(req: SimulationRequest):
             n_years=n_years,
             n_species=req.n_species
         )
-
+        print("🚀 AFTER run_simulation", flush=True)
+        
         # 8. 생성된 이미지 경로 수집
         before_images = sorted(
             glob.glob(os.path.join(sim_result["before_dir"], "images", "**", "*.png"), recursive=True)
