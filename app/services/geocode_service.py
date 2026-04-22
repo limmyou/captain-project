@@ -22,22 +22,22 @@ def geocode(address: str) -> tuple[float, float]:
             "key": VWORLD_API_KEY,
         }
 
-        print("VWORLD_KEY exists:", bool(VWORLD_API_KEY))
-        print("address:", address)
-        print("addr_type:", addr_type)
+        print("VWORLD_KEY exists:", bool(VWORLD_API_KEY), flush=True)
+        print("address:", address, flush=True)
+        print("addr_type:", addr_type, flush=True)
 
         try:
-            print("👉 sending request to VWorld...")
+            print("👉 sending request to VWorld...", flush=True)
             res = requests.get(VWORLD_URL, params=params, timeout=10)
 
-            print("👉 status code:", res.status_code)
-            print("👉 response text:", res.text[:300])
+            print("👉 status code:", res.status_code, flush=True)
+            print("👉 response text:", res.text[:300], flush=True)
 
             res.raise_for_status()
             data = res.json()
 
         except requests.RequestException as e:
-            print("❌ VWorld request failed:", addr_type, repr(e))
+            print("❌ VWorld request failed:", addr_type, repr(e), flush=True)
             last_error = e
             continue
 
@@ -56,6 +56,7 @@ def geocode(address: str) -> tuple[float, float]:
             print("❌ VWorld API returned non-OK:", response)
 
     if last_error is not None:
+        print("❌ Final VWorld failure:", repr(last_error), flush=True)
         raise RuntimeError("VWorld API 요청에 실패했습니다. 잠시 후 다시 시도해주세요.")
 
     raise RuntimeError("주소 좌표 변환에 실패했습니다.")
