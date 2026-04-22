@@ -684,13 +684,25 @@ document.addEventListener('DOMContentLoaded', function() {
       if (loadingPct) loadingPct.textContent = "70%";
       if (loadingMsg) loadingMsg.textContent = "결과를 정리하는 중입니다...";
 
-      const data = await response.json();
-      console.log("응답 data:", data);
+      let data = null;
+      const contentType = response.headers.get("content-type") || "";
+
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+        console.log("응답 data:", data);
+      } else {
+        const text = await response.text();
+        console.error("비 JSON 응답:", response.status, text);
+        throw new Error(`서버 오류 (${response.status})`);
+      }
 
       if (!response.ok) {
-        throw new Error(data.detail || "시뮬레이션 실행 중 오류가 발생했습니다.");
+        throw new Error(data?.detail || `시뮬레이션 실행 중 오류가 발생했습니다. (${response.status})`);
       }
+
       applySimulationResult(data);
+
+
 
       alert("시뮬레이션이 완료되었습니다.");
     } catch (error) {
