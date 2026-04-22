@@ -61,6 +61,9 @@ def serve_index():
 
 @app.post("/api/simulate")
 def simulate(req: SimulationRequest):
+    print("=== /api/simulate called ===", flush=True)
+    print("address:", req.address, flush=True)
+    print("scenario:", req.scenario, flush=True)
     try:
         if not req.address.strip():
             raise HTTPException(status_code=400, detail="주소를 입력해주세요.")
