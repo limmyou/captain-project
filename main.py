@@ -17,6 +17,10 @@ from app.services.simulation_service import run_simulation
 
 app = FastAPI(title="COFN Restoration Simulation API")
 
+os.makedirs("static", exist_ok=True)
+os.makedirs("simulation_output", exist_ok=True)
+os.makedirs("run_data", exist_ok=True)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/simulation_output", StaticFiles(directory="simulation_output"), name="simulation_output")
 app.mount("/run_data", StaticFiles(directory="run_data"), name="run_data")
