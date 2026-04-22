@@ -88,10 +88,10 @@ def simulate(req: SimulationRequest):
 
         # 1. 주소 -> 좌표
         lat, lon = geocode(req.address)
-
+        print("🔥 geocode result:", lat, lon, flush=True)
         # 2. 좌표 -> 행정구역
         admin_info = get_admin_info(lat, lon)
-
+        print("🔥 admin_info ok:", admin_info.get("emd_cd"), flush=True)
         # 3. 해당 행정구역 geometry 하나만 shp로 저장
         site_name = req.address.replace(" ", "_")
         run_base_dir = BASE_DIR / "run_data" / site_name
