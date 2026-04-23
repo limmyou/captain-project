@@ -221,37 +221,50 @@ def run_simulation(
     polygon_contours = measure.find_contours(final_mask, 0.5)
 
     def build_env():
-        custom_init_obj = CustomStateInitializer2(
-            scenario="sequential_restoration",
-            grid_size=grid_size,
-            mask_array=final_mask
-        )
-        env = BioDivEnv(
-            budget=0.5,
-            gridInitializer=custom_init_obj,
-            length=grid_size,
-            n_species=n_species,
-            alpha=alpha,
-            K_max=cell_capacity,
-            dispersal_rate=0.3,
-            disturbanceGenerator=disturbance_initializer,
-            disturbance_sensitivity=disturbance_sensitivity,
-            max_fraction_protected=1,
-            immediate_capacity=False,
-            truncateToInt=False,
-            species_threshold=1,
-            K_disturbance_coeff=1,
-            climateModel=climate_generator,
-            climate_sensitivity=np.zeros(n_species),
-            climate_as_disturbance=0,
-            iterations=n_years,
-            resolution=np.array([5, 5]),
-            growth_rate=growth_rate,
-            selectivedisturbanceInitializer=0,
-            selective_sensitivity=np.zeros(n_species),
-            list_species_values=np.ones(n_species)
-        )
-        return env
+        try:
+            print("🔥 build_env START", flush=True)
+
+            custom_init_obj = CustomStateInitializer2(
+                scenario="sequential_restoration",
+                grid_size=grid_size,
+                mask_array=final_mask
+            )
+
+            print("🔥 initializer OK", flush=True)
+
+            env = BioDivEnv(
+                budget=0.5,
+                gridInitializer=custom_init_obj,
+                length=grid_size,
+                n_species=n_species,
+                alpha=alpha,
+                K_max=cell_capacity,
+                dispersal_rate=0.3,
+                disturbanceGenerator=disturbance_initializer,
+                disturbance_sensitivity=disturbance_sensitivity,
+                max_fraction_protected=1,
+                immediate_capacity=False,
+                truncateToInt=False,
+                species_threshold=1,
+                K_disturbance_coeff=1,
+                climateModel=climate_generator,
+                climate_sensitivity=np.zeros(n_species),
+                climate_as_disturbance=0,
+                iterations=n_years,
+                resolution=np.array([5, 5]),
+                growth_rate=growth_rate,
+                selectivedisturbanceInitializer=0,
+                selective_sensitivity=np.zeros(n_species),
+                list_species_values=np.ones(n_species)
+            )
+
+            print("🔥 BioDivEnv CREATED", flush=True)
+
+            return env
+
+        except Exception as e:
+            print("❌ build_env ERROR:", repr(e), flush=True)
+            raise
 
     def overlay_boundary(ax, contours, color="red"):
         for contour in contours:
