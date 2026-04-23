@@ -36,6 +36,11 @@ def get_admin_info(lat: float, lon: float) -> dict:
     emd_cd = str(row["EMD_CD"])
     stdg_cd = emd_cd + "00"
 
+    print("EMD_CD:", emd_cd)
+    print("EMD_NM:", row.get("EMD_NM"))
+    print("stdg_cd(created):", stdg_cd)
+    print("available columns:", list(row.index))
+
     return {
         "emd_cd": emd_cd,
         "stdg_cd": stdg_cd,
