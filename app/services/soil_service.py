@@ -18,34 +18,33 @@ def get_soil_data(stdg_cd: str) -> dict:
     if not SOIL_API_KEY:
         raise ValueError("SOIL_API_KEY가 설정되지 않았습니다.")
 
-    ph_list = []
-    om_list = []
-    ca_list = []
-    mg_list = []
-    k_list = []
-    ec_list = []
-
+    ph_list, om_list, ca_list, mg_list, k_list, ec_list = [], [], [], [], [], []
     page = 1
 
     while True:
         params = {
             "serviceKey": SOIL_API_KEY,
-            "Page_Size": "100",
-            "Page_No": str(page),
+            "pageNo": str(page),
+            "numOfRows": "100",
             "STDG_CD": stdg_cd
         }
 
         try:
             res = requests.get(SOIL_API_URL, params=params, timeout=15)
+
+            print("==== SOIL API DEBUG ====")
+            print("SOIL_API_KEY exists:", bool(SOIL_API_KEY))
+            print("STDG_CD:", stdg_cd)
+            print("PAGE:", page)
+            print("PARAMS:", params)
+            print("REQUEST URL:", res.url)
+            print("STATUS:", res.status_code)
+            print(res.text[:1000])
+            print("========================")
+
             res.raise_for_status()
         except requests.RequestException as e:
             raise RuntimeError(f"토양 API 요청 실패: {e}")
-
-        print("==== SOIL API DEBUG ====")
-        print("STDG_CD:", stdg_cd)
-        print("PAGE:", page)
-        print(res.text[:1000])   # 처음 1000자만 확인
-        print("========================")
 
         try:
             root = ET.fromstring(res.text)
@@ -53,7 +52,6 @@ def get_soil_data(stdg_cd: str) -> dict:
             raise ValueError(f"토양 API XML 파싱 실패: {e}")
 
         items = root.findall(".//item")
-
         if not items:
             break
 
