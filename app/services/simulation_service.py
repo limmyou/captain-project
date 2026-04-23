@@ -145,7 +145,7 @@ def run_simulation(
     print("NUMPY VERSION:", np.__version__, flush=True)
 
     try:
-        import gym
+        import gymnasium as gym
         print("GYM VERSION:", gym.__version__, flush=True)
     except Exception as e:
         print("GYM IMPORT ERROR:", repr(e), flush=True)
