@@ -5,6 +5,9 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
+import gymnasium as gym
+sys.modules["gym"] = gym
+
 import os
 import gc
 import copy
@@ -145,7 +148,6 @@ def run_simulation(
     print("NUMPY VERSION:", np.__version__, flush=True)
 
     try:
-        import gymnasium as gym
         print("GYM VERSION:", gym.__version__, flush=True)
     except Exception as e:
         print("GYM IMPORT ERROR:", repr(e), flush=True)
