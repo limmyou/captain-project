@@ -1,12 +1,13 @@
 # app/services/geocode_service.py
-import os
 import requests
+from app.core.config import KAKAO_API_KEY
 
-KAKAO_API_KEY = os.getenv("KAKAO_API_KEY")
 KAKAO_URL = "https://dapi.kakao.com/v2/local/search/address.json"
 
 
 def geocode(address: str) -> tuple[float, float]:
+    print("GEOCODE DEBUG - KAKAO_API_KEY exists:", bool(KAKAO_API_KEY), flush=True)
+
     if not KAKAO_API_KEY:
         raise ValueError("KAKAO_API_KEY가 설정되지 않았습니다.")
 
@@ -41,7 +42,7 @@ def geocode(address: str) -> tuple[float, float]:
 
     first = documents[0]
 
-    x = first["x"]  # 경도
-    y = first["y"]  # 위도
+    x = first["x"]
+    y = first["y"]
 
     return float(y), float(x)
