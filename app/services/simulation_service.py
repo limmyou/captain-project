@@ -230,7 +230,6 @@ def run_simulation(
                 grid_size=grid_size,
                 mask_array=final_mask
             )
-
             print("🔥 initializer OK", flush=True)
 
             env = BioDivEnv(
@@ -258,13 +257,12 @@ def run_simulation(
                 selective_sensitivity=np.zeros(n_species),
                 list_species_values=np.ones(n_species)
             )
-
             print("🔥 BioDivEnv CREATED", flush=True)
 
             return env
 
         except Exception as e:
-            print("❌ build_env ERROR:", repr(e), flush=True)
+            print("❌ BioDivEnv ERROR:", repr(e), flush=True)
             raise
 
     def overlay_boundary(ax, contours, color="red"):
