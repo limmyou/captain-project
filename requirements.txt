@@ -15,7 +15,8 @@ pyproj
 fiona
 rasterio
 baltic
-gym
+gym==0.26.2
+gymnasium
 seaborn
 numba
 scikit-image
