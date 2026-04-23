@@ -5,8 +5,9 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-import gymnasium as gym
+import gym
 sys.modules["gym"] = gym
+sys.modules["gymnasium"] = gym
 
 import os
 import gc
