@@ -139,9 +139,24 @@ def run_simulation(
     mosby_factor: float = 1.20,
     seed: int = 42
 ):
+    print("=== run_simulation entered ===", flush=True)
+
+    import numpy as np
+    print("NUMPY VERSION:", np.__version__, flush=True)
+
+    try:
+        import gym
+        print("GYM VERSION:", gym.__version__, flush=True)
+    except Exception as e:
+        print("GYM IMPORT ERROR:", repr(e), flush=True)
+
+
     np.random.seed(seed)
 
+    print("before gpd.read_file", flush=True)
     gdf = gpd.read_file(shp_path)
+    print("after gpd.read_file", flush=True)
+    
     if gdf.empty:
         raise ValueError("입력 shapefile이 비어 있습니다.")
     if gdf.crs is None:
@@ -151,6 +166,7 @@ def run_simulation(
     bounds = gdf.total_bounds
     transform = from_bounds(*bounds, grid_size, grid_size)
 
+    print("before rasterize", flush=True)
     final_mask = features.rasterize(
         [(geom, 1) for geom in gdf.geometry],
         out_shape=(grid_size, grid_size),
@@ -158,10 +174,13 @@ def run_simulation(
         fill=0,
         dtype="uint8"
     ).astype(int)
+    print("after rasterize", flush=True)
+
 
     tif_files = ["Ca_fin.tif", "OM_fin.tif", "pH_fin.tif", "CEC_fin.tif", "EC_fin.tif"]
     layers = {}
 
+    print("before reading tif layers", flush=True)
     for tif_name in tif_files:
         full_path = os.path.join(tif_dir, tif_name)
         if not os.path.exists(full_path):
@@ -173,13 +192,14 @@ def run_simulation(
             dst_crs=dst_crs
         )
         layers[tif_name] = arr
-
+    print("after reading tif layers", flush=True)
+    
     if not layers:
         raise RuntimeError("사용 가능한 TIF 레이어가 없습니다.")
 
     mask_bool = final_mask.astype(bool)
     scored_layers = []
-
+    
     for name, arr in layers.items():
         arr_in = np.where(mask_bool, arr, np.nan)
         if "ph" in name.lower():
@@ -236,10 +256,15 @@ def run_simulation(
             ax.plot(contour[:, 1], contour[:, 0], color=color, linewidth=2)
 
     def run_and_save(label, apply_mosby):
+        print("before build_env", flush=True)
         env = build_env()
-        np.random.seed(seed)
-        env.reset()
+        print("after build_env", flush=True)
 
+        np.random.seed(seed)
+        print("before env.reset()", flush=True)
+        env.reset()
+        print("after env.reset()", flush=True)  
+        
         K_2d = cell_capacity * final_env
         if apply_mosby:
             K_2d[mosby_mask] *= mosby_factor
