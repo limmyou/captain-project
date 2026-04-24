@@ -232,6 +232,8 @@ def run_simulation(
             )
             print("🔥 initializer OK", flush=True)
 
+            print("🔥 BEFORE build_env", flush=True)
+
             env = BioDivEnv(
                 budget=0.5,
                 gridInitializer=custom_init_obj,
@@ -258,6 +260,7 @@ def run_simulation(
                 list_species_values=np.ones(n_species)
             )
             print("🔥 BioDivEnv CREATED", flush=True)
+            print("🔥 AFTER build_env", flush=True)
 
             return env
 
@@ -302,7 +305,15 @@ def run_simulation(
         density_means = {}
 
         for i in range(n_years):
+            year = i + 1
+            print(f"🔥 {label} YEAR START: {year}", flush=True)
+
             env.step()
+
+            print(f"🔥 {label} YEAR AFTER STEP: {year}", flush=True)
+
+            if year in plot_years:
+                print(f"🔥 {label} PLOT START: {year}", flush=True)
 
             if (i + 1) in plot_years:
                 year = i + 1
@@ -383,7 +394,11 @@ def run_simulation(
         }
 
     before_result = run_and_save(label="BEFORE", apply_mosby=False)
+    print("🔥 BEFORE RESULT DONE", flush=True)
+
     after_result = run_and_save(label="AFTER", apply_mosby=True)
+    print("🔥 AFTER RESULT DONE", flush=True)
+    print("🔥 RUN_SIMULATION RETURN", flush=True)
 
     return {
         "before_dir": before_result["base_dir"],
