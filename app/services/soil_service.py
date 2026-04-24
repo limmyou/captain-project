@@ -110,10 +110,14 @@ def get_soil_data(stdg_cd: str) -> dict:
 def get_soil_data_with_fallback(stdg_cd: str) -> dict:
     try:
         soil = get_soil_data(stdg_cd)
+
         if soil.get("has_data"):
             return soil
-    except Exception:
-        pass
+
+        print("[SOIL WARN] API 데이터 없음, 기본값 사용:", soil.get("message"), flush=True)
+
+    except Exception as e:
+        print("[SOIL WARN] API 실패, 기본값 사용:", repr(e), flush=True)
 
     return {
         "pH": 5.47,
@@ -124,5 +128,5 @@ def get_soil_data_with_fallback(stdg_cd: str) -> dict:
         "EC": 0.55,
         "CEC": 5.2,
         "has_data": False,
-        "message": "기본값 사용"
+        "message": "SOIL API 데이터 없음 - 기본값 사용"
     }
