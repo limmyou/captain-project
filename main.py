@@ -153,7 +153,7 @@ def simulate(req: SimulationRequest):
             n_species=req.n_species
         )
         print("🚀 AFTER run_simulation", flush=True)
-        
+
         # 8. 생성된 이미지 경로 수집
         before_images = sorted(
             glob.glob(os.path.join(sim_result["before_dir"], "images", "**", "*.png"), recursive=True)
@@ -164,15 +164,13 @@ def simulate(req: SimulationRequest):
 
         def to_web_path(path_str: str) -> str:
             path_str = path_str.replace("\\", "/")
-            base_str = str(BASE_DIR).replace("\\", "/")
 
-            if path_str.startswith(base_str):
-                path_str = path_str[len(base_str):]
+            # simulation_output 기준으로 잘라내기
+            if "simulation_output" in path_str:
+                path_str = path_str.split("simulation_output")[-1]
+                return "/simulation_output" + path_str
 
-            if not path_str.startswith("/"):
-                path_str = "/" + path_str
-
-            return path_str
+            return ""
 
         def pick_image(base_dir: str, relative_path: str) -> str:
             full_path = os.path.join(base_dir, "images", relative_path)
@@ -182,6 +180,11 @@ def simulate(req: SimulationRequest):
 
         before_image_urls = [to_web_path(p) for p in before_images]
         after_image_urls = [to_web_path(p) for p in after_images]
+
+        print("BEFORE PATH:", before_images[:3], flush=True)
+        print("WEB PATH:", before_image_urls[:3], flush=True)
+        print("AFTER PATH:", after_images[:3], flush=True)
+        print("AFTER WEB PATH:", after_image_urls[:3], flush=True)
 
         selected_years = [1, 2, 3] if req.period == "short" else [1, 5, 10, 15]
         mosby_year = 3 if req.period == "short" else 5
