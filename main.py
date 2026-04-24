@@ -45,9 +45,9 @@ SIM_OUTPUT_DIR = BASE_DIR / "simulation_output"
 class SimulationRequest(BaseModel):
     address: str
     scenario: str = "mosby"
-    n_species: int = 9
-    grid_size: int = 100
-    period: str = "long"   # short / long
+    n_species: int = 1
+    grid_size: int = 20
+    period: str = "short"   # short / long
     client_name: str | None = None
     client_email: EmailStr | None = None
 
@@ -68,8 +68,8 @@ def simulate(req: SimulationRequest):
         if not req.address.strip():
             raise HTTPException(status_code=400, detail="주소를 입력해주세요.")
 
-        if req.grid_size not in [50, 100]:
-            raise HTTPException(status_code=400, detail="grid_size는 50 또는 100만 가능합니다.")
+        if req.grid_size not in [20, 30, 50, 100]:
+            raise HTTPException(status_code=400, detail="grid_size는 20, 30, 50, 100만 가능합니다.")
 
         if not (1 <= req.n_species <= 9):
             raise HTTPException(status_code=400, detail="n_species는 1~9 사이여야 합니다.")
@@ -143,14 +143,18 @@ def simulate(req: SimulationRequest):
 
         # 7. 시뮬레이션 실행
         print("🚀 BEFORE run_simulation", flush=True)
+        runtime_grid_size = min(req.grid_size, 20)
+        runtime_n_species = min(req.n_species, 1)
+        runtime_n_years = 3
+
         sim_result = run_simulation(
             site=site_name,
             shp_path=str(site_shp_path),
             tif_dir=str(run_tif_dir),
             output_root=str(SIM_OUTPUT_DIR),
-            grid_size=req.grid_size,
-            n_years=n_years,
-            n_species=req.n_species
+            grid_size=runtime_grid_size,
+            n_years=runtime_n_years,
+            n_species=runtime_n_species
         )
         print("🚀 AFTER run_simulation", flush=True)
 
