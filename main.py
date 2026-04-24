@@ -144,8 +144,8 @@ def simulate(req: SimulationRequest):
         # 7. 시뮬레이션 실행
         print("🚀 BEFORE run_simulation", flush=True)
         runtime_grid_size = min(req.grid_size, 20)
-        runtime_n_species = min(req.n_species, 1)
-        runtime_n_years = 3
+        runtime_n_species = max(2, min(req.n_species, 3))
+        runtime_n_years = 3 if req.period == "short" else 10
 
         sim_result = run_simulation(
             site=site_name,
@@ -190,7 +190,7 @@ def simulate(req: SimulationRequest):
         print("AFTER PATH:", after_images[:3], flush=True)
         print("AFTER WEB PATH:", after_image_urls[:3], flush=True)
 
-        selected_years = [1, 2, 3] if req.period == "short" else [1, 5, 10, 15]
+        selected_years = [1, 2, 3] if req.period == "short" else [1, 3, 5, 10]
         mosby_year = 3 if req.period == "short" else 5
 
         before_dir = sim_result["before_dir"]
