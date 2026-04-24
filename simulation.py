@@ -317,7 +317,7 @@ if __name__ == "__main__":
             for contour in contours:
                 ax.plot(contour[:,1], contour[:,0], color=color, linewidth=2)
 
-        plot_years = [1, 2, 3, 5, 10, 15]
+        plot_years = [1, 3, 5, 10]
 
         np.random.seed(42)
         for i in range(n_years):
