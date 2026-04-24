@@ -144,7 +144,7 @@ def simulate(req: SimulationRequest):
         # 7. 시뮬레이션 실행
         print("🚀 BEFORE run_simulation", flush=True)
         runtime_grid_size = min(req.grid_size, 20)
-        runtime_n_species = max(2, min(req.n_species, 3))
+        runtime_n_species = 1
         runtime_n_years = 3 if req.period == "short" else 10
 
         sim_result = run_simulation(
@@ -197,8 +197,14 @@ def simulate(req: SimulationRequest):
         after_dir = sim_result["after_dir"]
 
         mosby_compare = {
-            "before": pick_image(before_dir, f"sp.0/sp.0_year_{mosby_year}.png"),
-            "after": pick_image(after_dir, f"sp.0/sp.0_year_{mosby_year}.png"),
+            "before": pick_image(
+                before_dir,
+                f"mean_population_density/mean_population_density_year_{mosby_year}.png"
+            ),
+            "after": pick_image(
+                after_dir,
+                f"mean_population_density/mean_population_density_year_{mosby_year}.png"
+            ),
             "year": mosby_year,
         }
 
