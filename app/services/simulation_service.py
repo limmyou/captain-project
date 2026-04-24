@@ -299,7 +299,7 @@ def run_simulation(
         if n_years <= 3:
             plot_years = [1, 2, 3]
         else:
-            plot_years = [1, 2, 3, 5, 10, 15]
+            plot_years = [1, 3, 5, 10]
 
         richness_means = {}
         density_means = {}
