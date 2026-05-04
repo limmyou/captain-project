@@ -58,6 +58,27 @@ def serve_index():
         raise HTTPException(status_code=404, detail="HTML 파일을 찾을 수 없습니다.")
     return FileResponse(str(HTML_FILE))
 
+@app.get("/db-test")
+def db_test():
+    import os
+    import oracledb
+
+    conn = oracledb.connect(
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        dsn=os.getenv("DB_DSN"),
+        config_dir=os.getenv("TNS_ADMIN")
+    )
+
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM dual")
+    result = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    return {"db": "connected", "result": result[0]}
+
 
 @app.post("/api/simulate")
 def simulate(req: SimulationRequest):
