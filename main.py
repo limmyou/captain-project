@@ -67,9 +67,7 @@ def db_test():
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
         dsn=os.getenv("DB_DSN"),
-        config_dir=os.getenv("TNS_ADMIN"),
-        wallet_location=os.getenv("TNS_ADMIN"),
-        wallet_password=None
+        config_dir="./wallet"
     )
 
     cur = conn.cursor()
