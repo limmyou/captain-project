@@ -63,11 +63,15 @@ def db_test():
     import os
     import oracledb
 
+    oracledb.init_oracle_client()
+
     conn = oracledb.connect(
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
         dsn=os.getenv("DB_DSN"),
-        config_dir=os.getenv("TNS_ADMIN")
+        config_dir=os.getenv("TNS_ADMIN"),
+        wallet_location=os.getenv("TNS_ADMIN"),
+        wallet_password=None
     )
 
     cur = conn.cursor()
