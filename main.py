@@ -63,8 +63,6 @@ def db_test():
     import os
     import oracledb
 
-    oracledb.init_oracle_client()
-
     conn = oracledb.connect(
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
