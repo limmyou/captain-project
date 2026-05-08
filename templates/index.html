@@ -14,7 +14,7 @@
  <div class="loading-card">
  <span class="loading-icon">🌿</span>
  <div class="loading-title">시뮬레이션 실행 중</div>
- <div class="loading-msg" id="loadingMsg">GIS 데이터를 불러오는 중...</div>
+ <div class="loading-msg" id="loadingMsg">약 1~2분 소요됩니다.</div>
  <div class="loading-progress-wrap">
  <div class="loading-progress" id="loadingProgress"></div>
  </div>
@@ -30,13 +30,9 @@
  <span class="brand-name">Code Of Nature</span>
  </div>
  <nav class="nav-links">
- <button class="nav-link active">대시보드</button>
- <button class="nav-link">프로젝트</button>
- <button class="nav-link">보고서</button>
  </nav>
  </div>
  <div class="topbar-right">
- <div class="status-badge"><div class="status-dot"></div> 시스템 정상</div>
  </div>
 </div>
 
@@ -50,11 +46,11 @@
  <div style="display:flex;flex-direction:column;gap:10px">
  <div class="input-group">
  <div class="input-label">이름</div>
- <input class="addr-input-plain" type="text" placeholder="의뢰인 이름 입력" id="clientName"/>
+ <input class="addr-input-plain" type="text" placeholder="이름 입력" id="clientName"/>
  </div>
  <div class="input-group">
  <div class="input-label">이메일</div>
- <input class="addr-input-plain" type="email" placeholder="이메일 주소 입력" id="clientEmail"/>
+ <input class="addr-input-plain" type="email" placeholder="주소 입력" id="clientEmail"/>
  </div>
  <button type="button" class="submit-btn" id="submitClientBtn">제출</button>
  <div id="clientSubmitMsg" style="display:none;font-size:12px;color:var(--primary);font-weight:600;text-align:center;padding:4px 0">정보가 등록되었습니다</div>
@@ -88,11 +84,11 @@
  <div class="sidebar-section-title">분석 문의</div>
  <div class="inquiry-inline">
   <div class="inquiry-inline-text">
-    더 정확한 분석이 필요하시면 연락처와 대상지 주소를 남겨주세요.
+    정확한 분석이 필요하시면 정보를 남겨주세요.
   </div>
 
   <div class="input-group">
-    <div class="input-label">연락받을 주소</div>
+    <div class="input-label">연락처</div>
     <input
       class="addr-input-plain"
       type="text"
@@ -153,17 +149,15 @@
  <div class="input-label">복원 시나리오</div>
  <select class="form-select" id="scenario">
  <option value="mosby" selected>모스비 살포</option>
- <option value="sequential">순차 복원</option>
- <option value="passive">자연 회복</option>
  </select>
  </div>
  <div class="input-group">
  <div class="input-label">모니터링 생물종 수</div>
  <select class="form-select" id="nSpecies">
- <option value="1">1종</option>
+ <option value="1" selected>1종</option>
  <option value="2">2종</option>
  <option value="3">3종</option>
- <option value="4" selected>4종</option>
+ <option value="4">4종</option>
  <option value="5">5종</option>
  <option value="6">6종</option>
  <option value="7">7종</option>
@@ -179,25 +173,13 @@
 
  <div class="divider"></div>
 
- <!-- 입력 레이어
- <div>
- <div class="sidebar-section-title">입력 레이어</div>
- <div class="layer-list" id="layerList">
- <div class="layer-item"><div class="layer-left"><div class="layer-dot" style="background:#1a6b3c"></div><span class="layer-name">pH</span></div><span class="layer-val">-</span></div>
- <div class="layer-item"><div class="layer-left"><div class="layer-dot" style="background:#2980b9"></div><span class="layer-name">Ca</span></div><span class="layer-val">-</span></div>
- <div class="layer-item"><div class="layer-left"><div class="layer-dot" style="background:#8e44ad"></div><span class="layer-name">OM</span></div><span class="layer-val">-</span></div>
- <div class="layer-item"><div class="layer-left"><div class="layer-dot" style="background:#e67e22"></div><span class="layer-name">CEC</span></div><span class="layer-val">-</span></div>
- <div class="layer-item"><div class="layer-left"><div class="layer-dot" style="background:#c0392b"></div><span class="layer-name">EC</span></div><span class="layer-val">-</span></div>
- </div>
- </div> -->
-
  </aside>
 
  <main class="content" id="mainContent">
  <div class="empty-state" id="emptyState">
  <div class="empty-icon">🌿</div>
  <div class="empty-title">복원 대상지를 입력해주세요</div>
- <div class="empty-sub">의뢰인 정보를 제출하고 주소를 입력한 뒤<br>시뮬레이션을 실행하면 20년간의<br>생태 복원 예측 데이터를 확인할 수 있습니다.</div>
+ <div class="empty-sub">주소를 입력한 뒤 시뮬레이션을 실행하면<br>생태 복원 예측 데이터를 확인할 수 있습니다.</div>
  </div>
 
 <div id="resultsWrap" class="results-wrap">
@@ -316,7 +298,7 @@
  </div>
         </div>
 
-        <!-- Trend chart card -->
+        <!-- 추세 차트 -->
         <div class="chart-card">
           <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
  <div style="display:flex;align-items:flex-start;justify-content:space-between">
@@ -335,7 +317,7 @@
  </div>
         </div>
 
- <!-- Richness maps -->
+ <!-- 종 풍부도 공간 분포도 -->
  <div class="chart-card">
  <div class="chart-header">
  <div><div class="chart-title">종 풍부도 공간 분포</div><div class="chart-sub" id="richnessYearsSub">시간에 따른 종의 다양성 변화</div></div>
@@ -354,7 +336,7 @@
  </div>
  </div>
 
- <!-- Density maps -->
+ <!-- 종 밀도 공간 분포도 -->
  <div class="chart-card">
  <div class="chart-header">
  <div><div class="chart-title">종 밀도 공간 분포</div><div class="chart-sub">시간에 따른 정착 수준 변화</div></div>
@@ -389,41 +371,6 @@
  <tbody id="spTableBody"></tbody>
  </table>
  </div>
-
- <!-- Bottom row -->
- <!-- <div class="bottom-row anim-in-4">
- <div class="metric-card">
- <div class="metric-title">토양 환경 점수</div>
- <div class="gauge-wrap">
- <svg width="70" height="70" viewBox="0 0 70 70">
- <circle cx="35" cy="35" r="28" fill="none" stroke="#e3e8e1" stroke-width="7"/>
- <circle cx="35" cy="35" r="28" fill="none" stroke="var(--primary)" stroke-width="7" stroke-dasharray="176" stroke-dashoffset="176" stroke-linecap="round" transform="rotate(-90 35 35)" id="gaugeCircle1" style="transition:stroke-dashoffset 1.2s ease"/>
- </svg>
- <div><div class="gauge-val" id="gaugeVal1">—</div><div class="gauge-sub">종합 지수 (0–1)<br>pH · Ca · OM · CEC · EC</div></div>
- </div>
- </div>
- <div class="metric-card">
- <div class="metric-title">Mosby 처리 효과</div>
- <div class="gauge-wrap">
- <svg width="70" height="70" viewBox="0 0 70 70">
- <circle cx="35" cy="35" r="28" fill="none" stroke="#e3e8e1" stroke-width="7"/>
- <circle cx="35" cy="35" r="28" fill="none" stroke="var(--accent)" stroke-width="7" stroke-dasharray="176" stroke-dashoffset="176" stroke-linecap="round" transform="rotate(-90 35 35)" id="gaugeCircle2" style="transition:stroke-dashoffset 1.2s ease"/>
- </svg>
- <div><div class="gauge-val" id="gaugeVal2">—</div><div class="gauge-sub">처리 면적 비율<br>K × 1.20 적용 구역</div></div>
- </div>
- </div>
- <div class="metric-card">
- <div class="metric-title">복원 완료 추정</div>
- <div class="gauge-wrap">
- <svg width="70" height="70" viewBox="0 0 70 70">
- <circle cx="35" cy="35" r="28" fill="none" stroke="#e3e8e1" stroke-width="7"/>
- <circle cx="35" cy="35" r="28" fill="none" stroke="var(--accent2)" stroke-width="7" stroke-dasharray="176" stroke-dashoffset="176" stroke-linecap="round" transform="rotate(-90 35 35)" id="gaugeCircle3" style="transition:stroke-dashoffset 1.2s ease"/>
- </svg>
- <div><div class="gauge-val" id="gaugeVal3">—</div><div class="gauge-sub">목표 달성 추정<br>현재 진행도 기준</div></div>
- </div>
- </div>
- </div> -->
-
  </div>
  </main>
 </div>
