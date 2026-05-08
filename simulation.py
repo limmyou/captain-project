@@ -1,54 +1,45 @@
 # 라이브러리 임포트
-import sys
+import gc
 import os
-import glob
+import re
+import sys
+import copy
+import hashlib
+from pathlib import Path
+
 import rasterio
 import numpy as np
 import geopandas as gpd
-import imageio.v2 as imageio
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from skimage import measure
-from shapely.geometry import Polygon, Point
 from rasterio import features
-from rasterio.transform import from_bounds
-
-# reproject/resample import
 from rasterio.warp import reproject
 from rasterio.enums import Resampling
+from rasterio.transform import from_bounds
+
+CAPTAIN_PROJECT_DIR=Path(r"C:\Users\heeli\Downloads\captain-project")
+sys.path.append(str(CAPTAIN_PROJECT_DIR))
 
 from captain.init_captain_custom_sim import CustomStateInitializer
 from captain.biodivsim.SimGrid import SimGrid
 from captain.biodivsim.BioDivEnv import BioDivEnv
 from captain.biodivsim.DisturbanceGenerator import InitialConstUniformDisturbanceGenerator
 from captain.biodivsim.ClimateGenerator import get_climate
-from captain.plot.plot_env import plot_env_state, plot_biodiv_env
-from captain.plot.plot_env import _plot_env_state_init
+from captain.plot.plot_env import plot_env_state, _plot_env_state_init
 
-sys.path.append(r"C:\Users\heeli\Downloads\captain-project")
-
-# =========================================================
-# [ADDED] 메모리 폭발 방지: SimGrid deepcopy만 막기
-# - CAPTAIN 내부 reset()에서 deepcopy(self.bioDivGrid) 때문에
-#   (100,100,100,100) 같은 거대 배열 복사가 발생하며 터질 수 있음
-# - SimGrid만 deepcopy를 "그대로 반환"하게 해서 복사 비용 제거
-# =========================================================
-import copy
-import gc
 
 _ORIG_DEEPCOPY = copy.deepcopy
 
 def _safe_deepcopy(obj, memo=None):
     if isinstance(obj, SimGrid):
-        return obj  # SimGrid는 복사하지 않음(메모리 절약)
+        return obj 
     return _ORIG_DEEPCOPY(obj, memo)
 
 copy.deepcopy = _safe_deepcopy
-# =========================================================
 
-
-class CustomStateInitializer2(CustomStateInitializer):
+class MaskedStateInitializer(CustomStateInitializer):
     def __init__(self, scenario, grid_size, mask_array=None):
         super().__init__(scenario, grid_size)
         self.mask_array = mask_array
@@ -61,7 +52,7 @@ class CustomStateInitializer2(CustomStateInitializer):
         if self.mask_array is None:
             return h
 
-        # 특정 종(Moss_A) 패치를 지역 마스크 안에서만 뿌리기
+        # Moss_A 패치를 지역 마스크 안에서만 뿌리기
         moss_patches = 3
         patch_size = 12
         for _ in range(moss_patches):
@@ -69,8 +60,10 @@ class CustomStateInitializer2(CustomStateInitializer):
                 idx = np.random.choice(len(self.mask_coords))
                 cx, cy = self.mask_coords[idx]
                 half = patch_size // 2
-                x0 = max(cx - half, 0); x1 = min(cx + half, length)
-                y0 = max(cy - half, 0); y1 = min(cy + half, length)
+                x0 = max(cx - half, 0)
+                x1 = min(cx + half, length)
+                y0 = max(cy - half, 0)
+                y1 = min(cy + half, length)
                 patch = (np.random.rand(x1-x0, y1-y0) > 0.4).astype(np.float64)
                 h[0, x0:x1, y0:y1] = patch * (K // (2 * moss_patches))
 
@@ -82,32 +75,87 @@ class CustomStateInitializer2(CustomStateInitializer):
         return h
 
 
-#------------------------------------------------------------------------------
-# main 실행부
-#------------------------------------------------------------------------------
-if __name__ == "__main__":
+def read_to_target_grid(tif_path, dst_shape, dst_transform, dst_crs):
+    with rasterio.open(tif_path) as src:
+        src_arr = src.read(1).astype(np.float32)
+        nodata = src.nodata
+        if nodata is not None:
+            src_arr = np.where(src_arr == nodata, np.nan, src_arr)
 
-    # 재현성 확보(랜덤 살포 구역 + 초기 패치 동일)
-    np.random.seed(42)
+        dst_arr = np.full(dst_shape, np.nan, dtype=np.float32)
 
-    #====================== 환경 및 경계 데이터 =======================
-    site = "별파랑공원"
-    root = r"C:\Users\heeli\Downloads\captain-project\gis_data"
-    tif_dir = os.path.join(root, site)
-    shp_path = os.path.join(tif_dir, f"{site}.shp")
+        reproject(
+            source=src_arr,
+            destination=dst_arr,
+            src_transform=src.transform,
+            src_crs=src.crs,
+            dst_transform=dst_transform,
+            dst_crs=dst_crs,
+            resampling=Resampling.bilinear
+        )
+    return dst_arr
 
-    os.chdir(tif_dir)
+# 레이어별 점수화
+def minmax01(arr, mask=None):
+    arr2 = arr.copy()
+    if mask is not None:
+        arr2 = np.where(mask, arr2, np.nan)
+
+    valid = np.isfinite(arr2)
+    if not np.any(valid):
+        return np.zeros_like(arr, dtype=np.float32)
+
+    vmin = np.nanmin(arr2[valid])
+    vmax = np.nanmax(arr2[valid])
+    if vmax - vmin < 1e-12:
+        out = np.zeros_like(arr, dtype=np.float32)
+        out[valid] = 1.0
+        return out
+
+    out = (arr2 - vmin) / (vmax - vmin)
+    out = np.nan_to_num(out, nan=0.0).astype(np.float32)
+    return out
+
+def score_ph(ph_arr, mask=None, optimal=6.5, width=1.0):
+    ph = ph_arr.copy()
+    if mask is not None:
+        ph = np.where(mask, ph, np.nan)
+    s = np.exp(-((ph - optimal) / width) ** 2).astype(np.float32)
+    s = np.nan_to_num(s, nan=0.0)
+    return s
+
+def overlay_boundary(ax, contours, color='red'):
+    for contour in contours:
+        ax.plot(contour[:,1], contour[:,0], color=color, linewidth=2)
+
+# ====================== MAIN 실행부 =======================
+
+def run_simulation(
+    site,
+    shp_path,
+    tif_dir,
+    output_root="simulation_output",
+    grid_size=100,
+    n_years=20,
+    n_species=9,
+    cell_capacity=25,
+    alpha=0.09,
+    mosby_fraction=0.2,
+    mosby_factor=1.3,
+    seed=42,
+):
+    np.random.seed(seed)
+
     gdf = gpd.read_file(shp_path)
 
     if gdf.crs is None:
-        raise ValueError("SHP에 CRS가 없습니다. gdf.crs를 확인/설정해야 합니다.")
+        raise ValueError("SHP에 CRS가 없습니다.")
     dst_crs = gdf.crs
 
-    grid_size = 100
     bounds = gdf.total_bounds
     transform = from_bounds(*bounds, grid_size, grid_size)
 
-    #====================== (1) SHP 영역 마스크 생성 =======================
+    # SHP 영역 마스크 생성
     mask_arr_polygon = features.rasterize(
         [(geom, 1) for geom in gdf.geometry],
         out_shape=(grid_size, grid_size),
@@ -117,31 +165,11 @@ if __name__ == "__main__":
     ).astype(int)
 
     final_mask = mask_arr_polygon
-    print(f"지형 마스크 생성 완료. 활성 면적: {final_mask.sum()}")
+    print(f"지형 마스크 생성 완료.")
 
-    #====================== (2) TIF 레이어 로드 =======================
+    # TIF 레이어 로드
     tif_files = ["Ca_fin.tif", "OM_fin.tif", "pH_fin.tif", "CEC_fin.tif", "EC_fin.tif"]
     layers = {}
-
-    def read_to_target_grid(tif_path, dst_shape, dst_transform, dst_crs):
-        with rasterio.open(tif_path) as src:
-            src_arr = src.read(1).astype(np.float32)
-            nodata = src.nodata
-            if nodata is not None:
-                src_arr = np.where(src_arr == nodata, np.nan, src_arr)
-
-            dst_arr = np.full(dst_shape, np.nan, dtype=np.float32)
-
-            reproject(
-                source=src_arr,
-                destination=dst_arr,
-                src_transform=src.transform,
-                src_crs=src.crs,
-                dst_transform=dst_transform,
-                dst_crs=dst_crs,
-                resampling=Resampling.bilinear
-            )
-        return dst_arr
 
     for tif_name in tif_files:
         full_path = os.path.join(tif_dir, tif_name)
@@ -157,37 +185,9 @@ if __name__ == "__main__":
         layers[tif_name] = arr
 
     if len(layers) == 0:
-        raise RuntimeError("사용 가능한 TIF 레이어가 없습니다. tif_dir 및 파일명을 확인하세요.")
+        raise RuntimeError("TIF 레이어가 없습니다")
 
-    #====================== (3) 레이어별 점수화/정규화 후 결합 =======================
-    def minmax01(arr, mask=None):
-        arr2 = arr.copy()
-        if mask is not None:
-            arr2 = np.where(mask, arr2, np.nan)
-
-        valid = np.isfinite(arr2)
-        if not np.any(valid):
-            return np.zeros_like(arr, dtype=np.float32)
-
-        vmin = np.nanmin(arr2[valid])
-        vmax = np.nanmax(arr2[valid])
-        if vmax - vmin < 1e-12:
-            out = np.zeros_like(arr, dtype=np.float32)
-            out[valid] = 1.0
-            return out
-
-        out = (arr2 - vmin) / (vmax - vmin)
-        out = np.nan_to_num(out, nan=0.0).astype(np.float32)
-        return out
-
-    def score_ph(ph_arr, mask=None, optimal=6.5, width=1.0):
-        ph = ph_arr.copy()
-        if mask is not None:
-            ph = np.where(mask, ph, np.nan)
-        s = np.exp(-((ph - optimal) / width) ** 2).astype(np.float32)
-        s = np.nan_to_num(s, nan=0.0)
-        return s
-
+    # 레이어별 점수화
     mask_bool = final_mask.astype(bool)
 
     scored_layers = []
@@ -214,22 +214,13 @@ if __name__ == "__main__":
     print(f"[INFO] 사용된 레이어: {used_layer_names}")
     print(f"[INFO] final_env range: {final_env.min():.4f} ~ {final_env.max():.4f}")
 
-    #====================== 시뮬레이션 파라미터 ======================
-    n_years = 20
-    n_species = 9
-    cell_capacity = 25
-    alpha = 0.09
 
     disturbance_initializer = InitialConstUniformDisturbanceGenerator(counter=0, magnitude=0.0)
     disturbance_sensitivity = np.ones(n_species)
     climate_generator, _ = get_climate(mode=3)
     growth_rate = np.array([1.5] + [1]*(n_species-1))
 
-    #======================
-    # (1) 고정된 모스비 살포 구역 선택
-    #======================
-    mosby_fraction = 0.2
-    mosby_factor = 1.3
+
     mosby_mask = (final_mask == 1) & (np.random.rand(*final_mask.shape) < mosby_fraction)
 
     valid_area = int((final_mask == 1).sum())
@@ -237,11 +228,9 @@ if __name__ == "__main__":
     applied_pct = (applied_area / valid_area * 100) if valid_area > 0 else 0
     print(f"[MOSBY MASK] target~{mosby_fraction*100:.1f}% | applied={applied_area}/{valid_area} ({applied_pct:.2f}%)")
 
-    #======================
-    # (2) env 생성 함수
-    #======================
+    # env 생성 함수
     def build_env():
-        custom_init_obj = CustomStateInitializer2(
+        custom_init_obj = MaskedStateInitializer(
             scenario="sequential_restoration",
             grid_size=grid_size,
             mask_array=final_mask
@@ -257,11 +246,10 @@ if __name__ == "__main__":
             selective_sensitivity=np.zeros(n_species), list_species_values=np.ones(n_species)
         )
         return env
-    # ======================
+    
     # 공통 초기 상태 1회 생성
-    # ======================
     base_env = build_env()
-    np.random.seed(42)
+    np.random.seed(seed)
     base_env.reset()
 
     # BEFORE / AFTER 모두 같은 시작 상태 사용
@@ -270,19 +258,15 @@ if __name__ == "__main__":
     del base_env
     gc.collect()
 
-
-    #======================
-    # (3) 실행 + 저장 함수 (BEFORE/AFTER 공통)
-    #======================
+    # 실행 + 저장 함수
     def run_and_save(label, apply_mosby):
         print(f"[{label}] mosby_mask sum:", int(mosby_mask.sum()))
-        import hashlib
         print(f"[{label}] mosby_mask md5:", hashlib.md5(mosby_mask.tobytes()).hexdigest())
 
         env = build_env()
 
         # 초기 상태 재현성
-        np.random.seed(42)
+        np.random.seed(seed)
         env.reset()
         env.bioDivGrid.h = np.array(initial_h, copy=True)
 
@@ -302,7 +286,7 @@ if __name__ == "__main__":
         print(f"[{label}] K mean mosby={k_mosby:.4f} | non-mosby={k_non:.4f}")
 
         # 저장 폴더
-        base_dir = f'./{site}_{label}'
+        base_dir = os.path.join(output_root, f"{site}_{label}")
         os.makedirs(base_dir, exist_ok=True)
         image_dir = os.path.join(base_dir, 'images')
         os.makedirs(image_dir, exist_ok=True)
@@ -313,13 +297,11 @@ if __name__ == "__main__":
         for cat in allowed_categories:
             os.makedirs(os.path.join(image_dir, cat.replace(' ', '_')), exist_ok=True)
 
-        def overlay_boundary(ax, contours, color='red'):
-            for contour in contours:
-                ax.plot(contour[:,1], contour[:,0], color=color, linewidth=2)
 
         plot_years = [1, 3, 5, 10]
+        exclude_keywords = ["total population size", "phylogenetic diversity", "variables through time"]
 
-        np.random.seed(42)
+        np.random.seed(seed)
         for i in range(n_years):
             env.step()
 
@@ -334,7 +316,6 @@ if __name__ == "__main__":
                     ax = figs[j].axes[0]
                     low_title = title.strip().lower()
 
-                    exclude_keywords = ["total population size", "phylogenetic diversity", "variables through time"]
                     if not any(ex in low_title for ex in exclude_keywords):
                         overlay_boundary(ax, polygon_contours, color='red')
 
@@ -344,7 +325,6 @@ if __name__ == "__main__":
                     elif "mean population density" in low_title:
                         target_cat = "mean_population_density"
                     else:
-                        import re
                         match = re.search(r'\d+', low_title)
                         if match:
                             sp_num = match.group()
@@ -359,16 +339,19 @@ if __name__ == "__main__":
 
         print(f"[{label}] done -> {base_dir}")
 
-        # =========================
-        # [ADDED] env 메모리 정리 (두 번 연속 실행 시 중요)
-        # =========================
+        # env 메모리 정리
         del env
         gc.collect()
+        return base_dir 
 
-    #======================
-    # (4) BEFORE / AFTER 둘 다 실행
-    #======================
-    run_and_save(label="BEFORE", apply_mosby=False)
-    run_and_save(label="AFTER",  apply_mosby=True)
+    # BEFORE / AFTER 둘 다 실행
+    before_dir = run_and_save(label="BEFORE", apply_mosby=False)
+    after_dir = run_and_save(label="AFTER", apply_mosby=True)
 
-    print("\n✅ BEFORE/AFTER 시뮬레이션 모두 완료!")
+    print("\n시뮬레이션 완료!")
+
+    return {
+        "before_dir": before_dir,
+        "after_dir": after_dir,
+        "mosby_mask_md5": hashlib.md5(mosby_mask.tobytes()).hexdigest(),
+    }
