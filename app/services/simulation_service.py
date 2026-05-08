@@ -11,10 +11,11 @@ sys.modules["gymnasium"] = gym
 
 import os
 import gc
+import re
 import copy
 import hashlib
-import numpy as np
 import rasterio
+import numpy as np
 import geopandas as gpd
 import matplotlib
 matplotlib.use("Agg")
@@ -29,11 +30,9 @@ from rasterio.enums import Resampling
 from captain.init_captain_custom_sim import CustomStateInitializer
 from captain.biodivsim.SimGrid import SimGrid
 from captain.biodivsim.BioDivEnv import BioDivEnv
-from captain.biodivsim.DisturbanceGenerator import InitialConstUniformDisturbanceGenerator
 from captain.biodivsim.ClimateGenerator import get_climate
-from captain.plot.plot_env import plot_env_state
-from captain.plot.plot_env import _plot_env_state_init
-
+from captain.biodivsim.DisturbanceGenerator import InitialConstUniformDisturbanceGenerator
+from captain.plot.plot_env import plot_env_state, _plot_env_state_init
 
 _ORIG_DEEPCOPY = copy.deepcopy
 
@@ -128,6 +127,9 @@ def score_ph(ph_arr, mask=None, optimal=6.5, width=1.0):
     s = np.exp(-((ph - optimal) / width) ** 2).astype(np.float32)
     return np.nan_to_num(s, nan=0.0)
 
+def overlay_boundary(ax, contours, color="red"):
+    for contour in contours:
+        ax.plot(contour[:, 1], contour[:, 0], color=color, linewidth=2)
 
 def run_simulation(
     site: str,
@@ -143,16 +145,13 @@ def run_simulation(
     mosby_factor: float = 1.20,
     seed: int = 42
 ):
-    print("=== run_simulation entered ===", flush=True)
-
-    import numpy as np
+    print("run_simulation entered", flush=True)
     print("NUMPY VERSION:", np.__version__, flush=True)
 
     try:
         print("GYM VERSION:", gym.__version__, flush=True)
     except Exception as e:
         print("GYM IMPORT ERROR:", repr(e), flush=True)
-
 
     np.random.seed(seed)
 
@@ -198,7 +197,7 @@ def run_simulation(
     print("after reading tif layers", flush=True)
     
     if not layers:
-        raise RuntimeError("사용 가능한 TIF 레이어가 없습니다.")
+        raise RuntimeError("TIF 레이어가 없습니다.")
 
     mask_bool = final_mask.astype(bool)
     scored_layers = []
@@ -223,16 +222,16 @@ def run_simulation(
 
     def build_env():
         try:
-            print("🔥 build_env START", flush=True)
+            print("build_env START", flush=True)
 
             custom_init_obj = CustomStateInitializer2(
                 scenario="sequential_restoration",
                 grid_size=grid_size,
                 mask_array=final_mask
             )
-            print("🔥 initializer OK", flush=True)
+            print("initializer OK", flush=True)
 
-            print("🔥 BEFORE build_env", flush=True)
+            print("BEFORE build_env", flush=True)
 
             env = BioDivEnv(
                 budget=0.5,
@@ -259,13 +258,13 @@ def run_simulation(
                 selective_sensitivity=np.zeros(n_species),
                 list_species_values=np.ones(n_species)
             )
-            print("🔥 BioDivEnv CREATED", flush=True)
-            print("🔥 AFTER build_env", flush=True)
+            print("BioDivEnv CREATED", flush=True)
+            print("AFTER build_env", flush=True)
 
             return env
 
         except Exception as e:
-            print("❌ BioDivEnv ERROR:", repr(e), flush=True)
+            print("BioDivEnv ERROR:", repr(e), flush=True)
             raise
 
     def overlay_boundary(ax, contours, color="red"):
@@ -306,14 +305,14 @@ def run_simulation(
 
         for i in range(n_years):
             year = i + 1
-            print(f"🔥 {label} YEAR START: {year}", flush=True)
+            print(f"{label} YEAR START: {year}", flush=True)
 
             env.step()
 
-            print(f"🔥 {label} YEAR AFTER STEP: {year}", flush=True)
+            print(f"{label} YEAR AFTER STEP: {year}", flush=True)
 
             if year in plot_years:
-                print(f"🔥 {label} PLOT START: {year}", flush=True)
+                print(f"{label} PLOT START: {year}", flush=True)
 
             if (i + 1) in plot_years:
                 year = i + 1
@@ -334,11 +333,11 @@ def run_simulation(
 
                     if not fig.axes:
                         print(f"[WARN] figs[{j}] has no axes, skip: {title}")
+                        plt.close(fig)
                         continue
 
                     ax = fig.axes[0]
 
-                    # 아래 기존 코드 그대로 유지
                     low_title = title.strip().lower()
 
                     exclude_keywords = ["total population size", "phylogenetic diversity", "variables through time"]
@@ -351,7 +350,6 @@ def run_simulation(
                     elif "mean population density" in low_title:
                         target_cat = "mean_population_density"
                     else:
-                        import re
                         match = re.search(r"\d+", low_title)
                         if match:
                             target_cat = f"sp.{match.group()}"
@@ -394,11 +392,11 @@ def run_simulation(
         }
 
     before_result = run_and_save(label="BEFORE", apply_mosby=False)
-    print("🔥 BEFORE RESULT DONE", flush=True)
+    print("BEFORE RESULT DONE", flush=True)
 
     after_result = run_and_save(label="AFTER", apply_mosby=True)
-    print("🔥 AFTER RESULT DONE", flush=True)
-    print("🔥 RUN_SIMULATION RETURN", flush=True)
+    print("AFTER RESULT DONE", flush=True)
+    print("RUN_SIMULATION RETURN", flush=True)
 
     return {
         "before_dir": before_result["base_dir"],
@@ -407,6 +405,6 @@ def run_simulation(
         "final_richness": after_result["final_richness"],
         "final_density": after_result["final_density"],
         "restoration_active_area": after_result["restoration_active_area"],
-        "richness_means": after_result["richness_means"],   # 추가
+        "richness_means": after_result["richness_means"],
         "density_means": after_result["density_means"],  
     }
