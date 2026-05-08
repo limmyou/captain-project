@@ -136,7 +136,7 @@ def run_simulation(
     tif_dir,
     output_root="simulation_output",
     grid_size=100,
-    n_years=20,
+    n_years=10,
     n_species=9,
     cell_capacity=25,
     alpha=0.09,
