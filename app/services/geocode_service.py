@@ -20,7 +20,7 @@ def geocode(address: str) -> tuple[float, float]:
     }
 
     try:
-        print("👉 카카오 API 요청", flush=True)
+        print("카카오 API 요청", flush=True)
         print("address:", address, flush=True)
 
         res = requests.get(KAKAO_URL, headers=headers, params=params, timeout=10)
@@ -32,7 +32,7 @@ def geocode(address: str) -> tuple[float, float]:
         data = res.json()
 
     except requests.RequestException as e:
-        print("❌ 카카오 API 실패:", repr(e), flush=True)
+        print("카카오 API 실패:", repr(e), flush=True)
         raise RuntimeError("주소 변환 API 요청 실패")
 
     documents = data.get("documents", [])
