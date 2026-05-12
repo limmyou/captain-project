@@ -1,4 +1,4 @@
-# 라이브러리 임포트
+# 라이브러리
 import glob
 import os
 import traceback
@@ -21,13 +21,12 @@ from app.services.tif_service import create_soil_tifs
 app = FastAPI(title="COFN Restoration Simulation API")
 
 
-# ====================== 경로 설정 ======================
+# 경로 설정
 BASE_DIR = Path(__file__).resolve().parent
 HTML_FILE = BASE_DIR / "templates" / "index.html"
 BOUNDARY_SHP_PATH = BASE_DIR / "data" / "UMD_ALL.shp"
 SIM_OUTPUT_DIR = BASE_DIR / "simulation_output"
-RUN_DATA_DIR = BASE_DIR / "run_data"  # [수정] run_data 경로를 상수로 분리
-
+RUN_DATA_DIR = BASE_DIR / "run_data" 
 
 for directory in ["static", str(SIM_OUTPUT_DIR), str(RUN_DATA_DIR)]:
     os.makedirs(directory, exist_ok=True)
@@ -45,7 +44,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ====================== 요청 모델 ======================
+# 요청 모델
 class SimulationRequest(BaseModel):
     address: str
     scenario: str = "mosby"
@@ -56,7 +55,7 @@ class SimulationRequest(BaseModel):
     client_email: EmailStr | None = None
 
 
-# ====================== 공통 함수 ======================
+# 공통 함수
 def validate_simulation_request(req: SimulationRequest):
     if not req.address.strip():
         raise HTTPException(status_code=400, detail="주소를 입력해주세요.")
@@ -107,7 +106,7 @@ def pick_image(base_dir: str, relative_path: str) -> str:
     return ""
 
 
-# ====================== 라우터 ======================
+# 라우터
 @app.get("/")
 def serve_index():
     if not HTML_FILE.exists():
