@@ -32,7 +32,6 @@ def get_soil_data(stdg_cd: str) -> dict:
         try:
             res = requests.get(SOIL_API_URL, params=params, timeout=15)
 
-            print("==== SOIL API DEBUG ====")
             print("SOIL_API_KEY exists:", bool(SOIL_API_KEY))
             print("STDG_CD:", stdg_cd)
             print("PAGE:", page)
@@ -114,10 +113,10 @@ def get_soil_data_with_fallback(stdg_cd: str) -> dict:
         if soil.get("has_data"):
             return soil
 
-        print("[SOIL WARN] API 데이터 없음, 기본값 사용:", soil.get("message"), flush=True)
+        print("API 데이터 없음, 기본값 사용:", soil.get("message"), flush=True)
 
     except Exception as e:
-        print("[SOIL WARN] API 실패, 기본값 사용:", repr(e), flush=True)
+        print("API 실패, 기본값 사용:", repr(e), flush=True)
 
     return {
         "pH": 5.47,
